@@ -140,13 +140,13 @@ class Window(tk.Frame):
                 # self.outputBox.insert(tk.END, output)
 
                 # Temporary workaround for prettier text output
-                if line_num == 2:
+                if line_num == 1:
                     self.outputBox.insert(tk.END, 'Using MASH to determine genera of samples...\n')
-                elif line_num ==3:
+                elif line_num ==2:
                     self.outputBox.insert(tk.END, 'Collecting basic quality metrics...\n')
-                elif line_num == 4:
+                elif line_num == 3:
                     self.outputBox.insert(tk.END, 'Using prodigal to calculate number of ORFs in each sample...\n')
-                elif line_num == 5:
+                elif line_num == 4:
                     self.outputBox.insert(tk.END, 'Done! Results can be found in {}\n'.format(
                         self.outFolderTextBox.get()))
 
