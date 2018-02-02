@@ -1,5 +1,6 @@
+#!/usr/bin/env python
+
 import os
-import glob
 import subprocess
 import tkinter as tk
 import tkinter.ttk
@@ -20,24 +21,24 @@ class Window(tk.Frame):
         # Title
         self.master.title('GenomeQAML')
 
+        # Occupy full space of the root window
+        self.pack(fill=tk.BOTH, expand=1)
+
         # Progress bar
         self.progress = tkinter.ttk.Progressbar(self, orient=tk.HORIZONTAL, length=100, mode='determinate')
         self.progress_bar = tk.Button(self, text='', command=self.bar)
 
-        # full space of root window
-        self.pack(fill=tk.BOTH, expand=1)
-
-        # create a quit button instance
+        # Quit button
         self.quitButton = tk.Button(self, text='Quit', command=self.client_exit)
 
-        # input folder browser button
-        self.inFolderBrowserButton = tk.Button(self, text='Select Directory', command=self.inDirectoryBox)
+        # Input folder button
+        self.inFolderBrowserButton = tk.Button(self, text='Select FASTA Folder', command=self.indir_box)
 
-        # output folder browser button
-        self.outFolderBrowserButton = tk.Button(self, text='Select Output Folder', command=self.outDirectoryBox)
+        # Output folder button
+        self.outFolderBrowserButton = tk.Button(self, text='Select Output Folder', command=self.outdir_box)
 
-        # submit job button
-        self.submitButton = tk.Button(self, text='Run GenomeQAML', command=self.runQaml)
+        # Submit job button
+        self.submitButton = tk.Button(self, text='Run GenomeQAML', command=self.run_qaml)
 
         # Browser text box
         self.inFolderTextBox = tk.Entry(self)
@@ -49,47 +50,34 @@ class Window(tk.Frame):
         self.outFolderTextBox.update()
         self.outFolderTextBox.focus_set()
 
-        # genomeQAML output box
+        # GenomeQAML output box
         self.outputBox = tk.Text(self)
         self.outputBox.update()
 
-        ### INPUT FOLDER
-        # place folder browser button
+        # INPUT FOLDER
         self.inFolderBrowserButton.grid(column=0, row=1, sticky='NSEW')
-
-        # place browser text box
         self.inFolderTextBox.grid(column=2, row=1, sticky='NSEW')
 
-        ### OUTPUT FOLDER
-        # place folder browser button
+        # OUTPUT FOLDER
         self.outFolderBrowserButton.grid(column=0, row=2, sticky='NSEW')
-
-        # place browser text box
         self.outFolderTextBox.grid(column=2, row=2, sticky='NSEW')
 
-        ### RUN GENOMEQAML
-        # place runQamlButton
+        # RUN GENOMEQAML
         self.submitButton.grid(column=0, row=3, sticky='NSEW')
 
-        ### GENOMEQAML OUTPUT
-        # place output box
+        # GENOMEQAML OUTPUT
         self.outputBox.grid(column=2, row=3, sticky='NSEW')
 
-        ### PROGRESSBAR
-        # place progress bar
+        # PROGRESSBAR
         self.progress.grid(column=2, row=5, sticky='NSEW')
 
-        ### QUIT
-        # place quitButton
+        # QUIT
         self.quitButton.grid(column=0, row=5, sticky='NSEW')
-
-
 
     def client_exit(self):
         exit()
 
-
-    def inDirectoryBox(self, title=None, dirName=None):
+    def indir_box(self, title=None, dirName=None):
         options = {}
         options['initialdir'] = dirName
         options['title'] = title
@@ -101,7 +89,7 @@ class Window(tk.Frame):
             self.inFolderTextBox.insert(index=0, string=str(self.inDirName))
             return self.inDirName
 
-    def outDirectoryBox(self, title=None, dirName=None):
+    def outdir_box(self, title=None, dirName=None):
         options = {}
         options['initialdir'] = dirName
         options['title'] = title
@@ -113,15 +101,21 @@ class Window(tk.Frame):
             self.outFolderTextBox.insert(index=0, string=str(self.outDirName))
             return self.outDirName
 
-    def runQaml(self):
+    def run_qaml(self):
         # Make sure FASTA files are available
         valid_in = self.validate_fasta_folder()
+
+        # Make sure a directory has been provided
         valid_out = self.validate_is_folder()
+
+        # Inform user
         if not valid_in:
             tk.messagebox.showinfo("Error", "No FASTA files detected in folder. Please specify a new folder.")
-        elif not valid_out:
+        if not valid_out:
             tk.messagebox.showinfo("Error", "Invalid entry for Output Folder. Please specify a new folder.")
-        else:
+
+        # Run GenomeQAML
+        if valid_in is True and valid_out is True:
             # Clear box
             self.outputBox.delete('1.0', tk.END)
 
@@ -166,10 +160,11 @@ class Window(tk.Frame):
 
 
     def validate_fasta_folder(self):
-        folder_contents = glob.glob(self.inFolderTextBox.get())
+        folder_contents = os.listdir(self.inFolderTextBox.get())
         status = False
         for file in folder_contents:
-            if 'fasta' or 'fna' or 'fa' in file:
+            print(file)
+            if file.endswith('.fasta') or file.endswith('.fna') or file.endswith('.fa'):
                 status = True
         return status
 
@@ -182,7 +177,7 @@ class Window(tk.Frame):
         self.progress['value'] = 0
 
     def move_extracted_features(self):
-        file = glob.glob(os.path.join(self.inFolderTextBox.get(), 'extracted_features.csv'))[0]
+        file = os.path.join(self.inFolderTextBox.get(), 'extracted_features.csv')
         new_filename = file.replace('extracted_features',
                                     os.path.basename(self.inFolderTextBox.get())+'_extracted_features')
         os.rename(os.path.join(self.inFolderTextBox.get(), file),
